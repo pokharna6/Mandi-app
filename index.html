@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AgriDistro - Garlic & Ayurvedic Seeds Distribution</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #15803d;
+      --primary-dark: #14532d;
+      --accent: #b45309;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Hide scrollbars for smooth mobile app feel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Bottom Sheet slide-up animation */
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    /* Printable Challan */
+    @media print {
+      body * { visibility: hidden; }
+      #printableChallan, #printableChallan * { visibility: visible; }
+      #printableChallan { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased select-none pb-24">
+
+  <!-- ============================================================== -->
+  <!-- MOBILE CONTAINER (Max width constrained on desktop for true app feel) -->
+  <!-- ============================================================== -->
+  <div class="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col shadow-2xl relative border-x border-slate-200">
+
+    <!-- MOBILE TOP APP BAR -->
+    <header class="bg-emerald-800 text-white sticky top-0 z-40 shadow-sm px-4 pt-3 pb-3">
+      <div class="flex items-center justify-between">
+        <!-- Logo & Business Name -->
+        <div class="flex items-center gap-2.5">
+          <div onclick="openLogoUploadModal()" class="relative cursor-pointer group">
+            <div id="headerLogoContainer" class="w-10 h-10 rounded-full bg-emerald-900 border-2 border-emerald-400/80 flex items-center justify-center overflow-hidden shadow-inner text-xl">
+              🧄
+            </div>
+            <span class="absolute -bottom-1 -right-1 bg-amber-500 text-slate-900 text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-white shadow">
+              ✎
+            </span>
+          </div>
+          <div>
+            <h1 class="font-bold text-sm tracking-tight leading-tight line-clamp-1" id="bizTitleDisplay">
+              Kisan Agri & Seeds Distro
+            </h1>
+            <div class="flex items-center gap-1.5 text-[11px] text-emerald-200">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="headerTodayDate">23 Nov 2026</span>
+              <span>•</span>
+              <span class="text-amber-300 font-medium">Mandi Live</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action on Top -->
+        <div class="flex items-center gap-1.5">
+          <button onclick="openBroadcastModal()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-900 font-bold px-2.5 py-1.5 rounded-lg text-xs shadow flex items-center gap-1 transition">
+            <span>📢</span>
+            <span class="hidden xs:inline">WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- TOAST NOTIFICATION (Appears at top for mobile thumb reach) -->
+    <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-full shadow-2xl text-xs flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-2 whitespace-nowrap max-w-[90%] border border-slate-700">
+      <span id="toastIcon">✅</span>
+      <span id="toastMsg" class="truncate font-medium">Action saved</span>
+    </div>
+
+    <!-- MAIN SCROLLABLE APP BODY -->
+    <main class="flex-1 p-3.5 space-y-4">
+
+      <!-- ============================================================== -->
+      <!-- TAB 1: DAILY RATES (With Range Pricing & Add Product) -->
+      <!-- ============================================================== -->
+      <section id="view-rates" class="space-y-3.5">
+        
+        <!-- Header Banner & Add Product Button -->
+        <div class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white rounded-xl p-3.5 shadow-sm space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">Today's Rate Board</span>
+              <h2 class="text-sm font-bold text-white">Daily Mandi Price Ranges</h2>
+            </div>
+            <button onclick="openAddProductModal()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow flex items-center gap-1 transition border border-emerald-400/40">
+              <span>➕ Add Item</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-emerald-100/90 leading-tight">
+            Prices change daily based on lot & quality. Set min & max range (e.g. ₹240 - ₹260), then broadcast to all grocery shops on WhatsApp!
+          </p>
+          <div class="flex items-center gap-2 pt-1">
+            <button onclick="saveAllRates()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-900 font-bold py-1.5 px-3 rounded-lg text-xs shadow flex items-center justify-center gap-1.5 transition">
+              <span>💾 Save Today's Rates</span>
+            </button>
+            <button onclick="openBroadcastModal()" class="flex-1 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-900 font-bold py-1.5 px-3 rounded-lg text-xs shadow flex items-center justify-center gap-1.5 transition">
+              <span>📲 Share on WhatsApp</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
+          <button onclick="filterRates('all')" class="cat-pill active-cat px-3 py-1 rounded-full bg-slate-800 text-white font-medium shrink-0" data-cat="all">All (<span id="cat-count-all">0</span>)</button>
+          <button onclick="filterRates('Garlic')" class="cat-pill px-3 py-1 rounded-full bg-white border border-slate-300 text-slate-700 font-medium shrink-0" data-cat="Garlic">🧄 Garlic</button>
+          <button onclick="filterRates('Seeds')" class="cat-pill px-3 py-1 rounded-full bg-white border border-slate-300 text-slate-700 font-medium shrink-0" data-cat="Seeds">🌱 Seeds</button>
+          <button onclick="filterRates('Pulses')" class="cat-pill px-3 py-1 rounded-full bg-white border border-slate-300 text-slate-700 font-medium shrink-0" data-cat="Pulses">🥣 Pulses</button>
+          <button onclick="filterRates('Herbs')" class="cat-pill px-3 py-1 rounded-full bg-white border border-slate-300 text-slate-700 font-medium shrink-0" data-cat="Herbs">🌿 Ayurvedic</button>
+        </div>
+
+        <!-- Products List (Mobile Cards) -->
+        <div id="productsListContainer" class="space-y-2.5">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Quick Add Helper at bottom of list -->
+        <button onclick="openAddProductModal()" class="w-full py-3 border-2 border-dashed border-emerald-300 bg-emerald-50/50 hover:bg-emerald-100/50 rounded-xl text-emerald-800 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-98">
+          <span>➕ Add More Garlic, Seed or Pulse Products</span>
+        </button>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- TAB 2: SUPPLY & DELIVERY ENTRY -->
+      <!-- ============================================================== -->
+      <section id="view-delivery" class="hidden space-y-3.5">
+        
+        <!-- Quick Log Delivery Card -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+          <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+            <div>
+              <h2 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                <span>🚚</span> Log Store Delivery
+              </h2>
+              <p class="text-[11px] text-slate-500">Record supply date, exact time, and send shopkeeper receipt</p>
+            </div>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Dual Entry</span>
+          </div>
+
+          <form id="deliveryForm" onsubmit="handleDeliverySubmit(event)" class="space-y-3 text-xs">
+            <!-- Select Store -->
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Select Grocery Mart / Shop *</label>
+              <div class="flex gap-1.5">
+                <select id="delStoreSelect" required class="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                  <!-- JS populated -->
+                </select>
+                <button type="button" onclick="openAddStoreModal()" class="bg-slate-200 hover:bg-slate-300 px-2.5 py-2 rounded-lg text-slate-700 font-bold text-xs" title="New Store">
+                  ➕
+                </button>
+              </div>
+            </div>
+
+            <!-- Select Product -->
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Item to Supply *</label>
+              <select id="delProductSelect" required onchange="handleProductSelectForDelivery()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                <!-- JS populated -->
+              </select>
+              <!-- Today's Rate Range Helper -->
+              <div id="rateRangeHelper" class="mt-1.5 flex items-center justify-between bg-amber-50 border border-amber-200 rounded px-2 py-1 text-[11px]">
+                <span class="text-amber-800 font-medium">Today's Range: <strong id="helperRangeText">₹240 - ₹260</strong></span>
+                <div class="flex items-center gap-1" id="helperQuickButtons">
+                  <!-- Quick buttons: Min, Mid, Max -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Qty & Agreed Rate -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Quantity (Kg/Bags) *</label>
+                <input type="number" id="delQuantity" required min="1" step="0.5" value="50" oninput="calculateDeliveryTotal()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 text-xs font-semibold focus:ring-1 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Agreed Rate (₹/Kg) *</label>
+                <input type="number" id="delRate" required step="1" oninput="calculateDeliveryTotal()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-emerald-800 text-xs font-bold focus:ring-1 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <!-- Packaging & Total -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Packaging</label>
+                <select id="delPackaging" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 text-xs">
+                  <option value="Gunny Bag (50kg)">Gunny Bag (50kg)</option>
+                  <option value="Mesh Bag (25kg)">Mesh Bag (25kg)</option>
+                  <option value="Plastic Sack">Plastic Sack</option>
+                  <option value="Loose Crate">Loose Crate</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Total Bill (₹)</label>
+                <input type="text" id="delTotal" readonly class="w-full bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold rounded-lg px-2.5 py-2 text-xs">
+              </div>
+            </div>
+
+            <!-- Payment Mode -->
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Payment Status</label>
+              <select id="delPaymentStatus" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 text-xs">
+                <option value="Credit / Udhar (Pending)">Credit / Udhar (Weekly Khata)</option>
+                <option value="Cash Paid on Spot">Cash Paid on Spot</option>
+                <option value="UPI Paid on Delivery">UPI / Online Paid</option>
+              </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2.5 rounded-lg shadow text-xs flex items-center justify-center gap-1.5 transition">
+              <span>✅ Mark Supplied & Create Challan</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Recent Supply Records List -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Recent Supply History</h3>
+            <span class="text-[11px] text-slate-500" id="deliveryCountBadge">3 deliveries</span>
+          </div>
+          <div id="deliveriesMobileList" class="space-y-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- TAB 3: KHATA & STORE LEDGER -->
+      <!-- ============================================================== -->
+      <section id="view-khata" class="hidden space-y-3.5">
+        
+        <!-- Khata Summary Cards -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+            <span class="text-[10px] text-slate-500 font-semibold block uppercase">Total Supplied</span>
+            <h4 class="text-base font-bold text-slate-800 mt-0.5" id="khataTotalSupplied">₹0</h4>
+          </div>
+          <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 shadow-sm">
+            <span class="text-[10px] text-amber-700 font-bold block uppercase">Pending Balance</span>
+            <h4 class="text-base font-bold text-amber-800 mt-0.5" id="khataTotalOutstanding">₹0</h4>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between px-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Store Balances (Udhar)</h3>
+          <button onclick="openAddPaymentModal()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow flex items-center gap-1 transition">
+            <span>➕ Record Payment</span>
+          </button>
+        </div>
+
+        <!-- Store Khata Mobile Cards -->
+        <div id="khataMobileList" class="space-y-2">
+          <!-- Rendered via JS -->
+        </div>
+
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- TAB 4: STOREFRONT (WHAT CLIENTS & NEW MARTS SEE) -->
+      <!-- ============================================================== -->
+      <section id="view-client-view" class="hidden space-y-3.5">
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center justify-between gap-2 text-xs">
+          <div>
+            <p class="font-bold text-blue-900">Your Public Mobile Catalog</p>
+            <p class="text-[11px] text-blue-700">Grocery stores open this link to check today's rates & place sample orders.</p>
+          </div>
+          <button onclick="copyShareableLink()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold px-2.5 py-1.5 rounded-lg text-xs shrink-0 shadow flex items-center gap-1 transition">
+            <span>🔗 Copy</span>
+          </button>
+        </div>
+
+        <!-- Mobile Storefront Preview Card -->
+        <div class="bg-white border-2 border-emerald-600 rounded-2xl shadow-lg overflow-hidden">
+          <!-- Storefront Header with Logo -->
+          <div class="bg-emerald-800 text-white p-4">
+            <div class="flex items-center gap-3">
+              <div id="storefrontLogoContainer" class="w-12 h-12 rounded-full bg-emerald-950 border-2 border-emerald-400 flex items-center justify-center overflow-hidden text-2xl shrink-0 shadow">
+                🧄
+              </div>
+              <div>
+                <h3 class="font-bold text-sm leading-snug" id="storefrontBizName">Kisan Agri & Seeds Distro</h3>
+                <p class="text-[11px] text-emerald-200">Wholesale Garlic, Ayurvedic Seeds & Pulses</p>
+                <div class="mt-1 inline-flex items-center gap-1 bg-emerald-700/80 px-2 py-0.5 rounded text-[10px] text-emerald-100 font-medium">
+                  <span>● Live Rates for</span> <span id="storefrontDate">23 Nov 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price List for Shops -->
+          <div class="p-3.5 space-y-2.5">
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Today's Wholesale Rates</h4>
+            <div class="space-y-2" id="storefrontRatesList">
+              <!-- Rendered via JS with price ranges -->
+            </div>
+
+            <!-- New Shop Order / Sample Request Box -->
+            <div class="mt-4 pt-3 border-t border-slate-200 bg-slate-50 -mx-3.5 -mb-3.5 p-3.5">
+              <div class="flex items-center gap-1.5 mb-2">
+                <span class="text-base">🛒</span>
+                <h4 class="font-bold text-slate-800 text-xs">Place Order / Request First Sample</h4>
+              </div>
+              <p class="text-[10px] text-slate-500 mb-2.5">Direct supply at your store. Weekly billing available for verified grocery marts.</p>
+
+              <form onsubmit="handleClientOrderSubmit(event)" class="space-y-2.5 text-xs">
+                <div>
+                  <input type="text" id="clientShopName" required placeholder="Your Shop / Mart Name *" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <input type="tel" id="clientPhone" required placeholder="WhatsApp / Mobile Number *" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <select id="clientProductSelect" required class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                    <!-- JS populated -->
+                  </select>
+                  <input type="text" id="clientQty" required placeholder="e.g. 1 Bag / 50kg *" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <input type="text" id="clientAddress" placeholder="Shop Address / Market Landmark" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 text-xs focus:ring-1 focus:ring-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow flex items-center justify-center gap-1.5">
+                  <span>📲 Send Order Request to Supplier</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- TAB 5: SETTINGS, LOGO & STORE MANAGEMENT -->
+      <!-- ============================================================== -->
+      <section id="view-settings" class="hidden space-y-3.5">
+        
+        <!-- Logo & Branding Card -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm">Logo & Business Branding</h3>
+              <p class="text-[11px] text-slate-500">Appears on Challans, WhatsApp cards & Storefront</p>
+            </div>
+            <button onclick="openLogoUploadModal()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-lg text-xs border border-emerald-200">
+              Change Logo
+            </button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div id="settingsLogoPreview" class="w-14 h-14 rounded-full bg-emerald-900 border-2 border-emerald-500 flex items-center justify-center overflow-hidden text-3xl shadow">
+              🧄
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-800" id="settingsBizTitleDisplay">Kisan Agri & Seeds Distro</h4>
+              <p class="text-[11px] text-slate-500">Upload your shop/brand logo from your phone</p>
+              <button onclick="openLogoUploadModal()" class="mt-1 text-emerald-700 hover:underline text-xs font-semibold inline-flex items-center gap-1">
+                <span>📷 Upload Image / Choose Icon</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Business Details Form -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+          <h3 class="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Business Contact Details</h3>
+          <form onsubmit="handleSaveBusinessProfile(event)" class="space-y-2.5 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Business / Firm Name</label>
+              <input type="text" id="settingsBizName" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Owner Contact / WhatsApp Number</label>
+              <input type="text" id="settingsBizPhone" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Mandi / Warehouse Address</label>
+              <input type="text" id="settingsBizAddress" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">UPI ID for Balance Payments</label>
+              <input type="text" id="settingsBizUpi" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+            </div>
+            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow transition">
+              Save Business Details
+            </button>
+          </form>
+        </div>
+
+        <!-- Registered Stores Management -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm">Grocery Stores & Marts</h3>
+              <p class="text-[11px] text-slate-500">Your network of local buyers</p>
+            </div>
+            <button onclick="openAddStoreModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-xs shadow">
+              ➕ Add Store
+            </button>
+          </div>
+          <div id="storesSettingsList" class="space-y-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ============================================================== -->
+    <!-- FIXED PHONE BOTTOM NAVIGATION BAR -->
+    <!-- ============================================================== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg">
+      <div class="max-w-md mx-auto grid grid-cols-5 text-center">
+        
+        <button onclick="switchTab('rates')" id="nav-rates" class="py-2.5 flex flex-col items-center justify-center text-emerald-700 font-bold border-t-2 border-emerald-600 bg-emerald-50/50">
+          <span class="text-lg">📊</span>
+          <span class="text-[10px] mt-0.5">Rates</span>
+        </button>
+
+        <button onclick="switchTab('delivery')" id="nav-delivery" class="py-2.5 flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 font-medium border-t-2 border-transparent">
+          <span class="text-lg">🚚</span>
+          <span class="text-[10px] mt-0.5">Supply</span>
+        </button>
+
+        <button onclick="switchTab('khata')" id="nav-khata" class="py-2.5 flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 font-medium border-t-2 border-transparent">
+          <span class="text-lg">📒</span>
+          <span class="text-[10px] mt-0.5">Khata</span>
+        </button>
+
+        <button onclick="switchTab('client-view')" id="nav-client-view" class="py-2.5 flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 font-medium border-t-2 border-transparent">
+          <span class="text-lg">📱</span>
+          <span class="text-[10px] mt-0.5">Storefront</span>
+        </button>
+
+        <button onclick="switchTab('settings')" id="nav-settings" class="py-2.5 flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 font-medium border-t-2 border-transparent">
+          <span class="text-lg">⚙️</span>
+          <span class="text-[10px] mt-0.5">Settings</span>
+        </button>
+
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- MODALS -->
+  <div id="productModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-slide-up">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50 sticky top-0">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+          <span>🌱</span> <span id="productModalTitle">Add New Product</span>
+        </h3>
+        <button onclick="closeModal('productModal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <form onsubmit="handleProductFormSubmit(event)" class="p-4 space-y-3 text-xs">
+        <input type="hidden" id="prodFormId">
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Product Name *</label>
+          <input type="text" id="prodFormName" required placeholder="e.g. Ooty Garlic (Big Clove) or Kalonji" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 focus:ring-1 focus:ring-emerald-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Category *</label>
+            <select id="prodFormCategory" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+              <option value="Garlic">🧄 Garlic Specials</option>
+              <option value="Seeds">🌱 Ayurvedic Seeds</option>
+              <option value="Pulses">🥣 Pulses / Dals</option>
+              <option value="Herbs">🌿 Ayurvedic Herbs</option>
+              <option value="Spices">🌶️ Spices</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Emoji / Icon</label>
+            <select id="prodFormIcon" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 text-base">
+              <option value="🧄">🧄 Garlic</option>
+              <option value="🌱">🌱 Seeds</option>
+              <option value="🥣">🥣 Pulses</option>
+              <option value="🌿">🌿 Herbs</option>
+              <option value="🌾">🌾 Grains</option>
+              <option value="🌰">🌰 Nuts</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-3 space-y-2">
+          <label class="block font-bold text-amber-900 text-[11px] uppercase tracking-wider">
+            Today's Price Range (₹ / Unit) *
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="text-[10px] text-slate-500 font-semibold block">Min Rate (₹)</span>
+              <input type="number" id="prodFormMinRate" required min="1" step="1" placeholder="240" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 font-bold text-sm focus:ring-1 focus:ring-amber-500">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-500 font-semibold block">Max Rate (₹)</span>
+              <input type="number" id="prodFormMaxRate" required min="1" step="1" placeholder="260" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 font-bold text-sm focus:ring-1 focus:ring-amber-500">
+            </div>
+          </div>
+          <p class="text-[10px] text-amber-800">For example: 240 to 260 / kg based on quality/lot.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Unit</label>
+            <select id="prodFormUnit" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+              <option value="kg">per kg</option>
+              <option value="50kg Bag">50 kg Bag</option>
+              <option value="Quintal">Quintal (100kg)</option>
+              <option value="25kg Sack">25 kg Sack</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Pack / MOQ</label>
+            <input type="text" id="prodFormMoq" placeholder="e.g. 50 kg (1 Bag)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Quality / Description</label>
+          <input type="text" id="prodFormDesc" placeholder="e.g. Fresh white large cloves, low moisture" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+        </div>
+
+        <div class="pt-2 flex items-center gap-2">
+          <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2.5 rounded-lg shadow text-xs transition">
+            Save Product
+          </button>
+          <button type="button" onclick="closeModal('productModal')" class="bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-lg text-xs">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="logoModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 animate-slide-up overflow-hidden">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+          <span>📷</span> Change Business Logo
+        </h3>
+        <button onclick="closeModal('logoModal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <div class="p-4 space-y-4 text-xs">
+        <div class="text-center space-y-2">
+          <div id="modalLogoPreview" class="w-20 h-20 rounded-full mx-auto bg-emerald-950 border-4 border-emerald-400 flex items-center justify-center overflow-hidden text-4xl shadow-md">
+            🧄
+          </div>
+          <p class="text-slate-600 font-medium">Your Current Logo</p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+          <label class="block font-bold text-slate-800 text-xs">Upload from Phone Gallery / Camera</label>
+          <input type="file" id="logoFileInput" accept="image/*" onchange="handleLogoFileSelect(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700">
+          <p class="text-[10px] text-slate-400">Supports PNG, JPG, WebP. Automatically formatted as your circular logo.</p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-bold text-slate-700 text-xs">Or Choose a Commodity Icon</label>
+          <div class="flex items-center justify-around gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200 text-2xl">
+            <button onclick="setLogoEmoji('🧄')" class="hover:scale-125 transition p-1.5 rounded-lg hover:bg-white">🧄</button>
+            <button onclick="setLogoEmoji('🌱')" class="hover:scale-125 transition p-1.5 rounded-lg hover:bg-white">🌱</button>
+            <button onclick="setLogoEmoji('🥣')" class="hover:scale-125 transition p-1.5 rounded-lg hover:bg-white">🥣</button>
+            <button onclick="setLogoEmoji('🌿')" class="hover:scale-125 transition p-1.5 rounded-lg hover:bg-white">🌿</button>
+            <button onclick="setLogoEmoji('🌾')" class="hover:scale-125 transition p-1.5 rounded-lg hover:bg-white">🌾</button>
+            <button onclick="setLogoEmoji('🚜')" class="hover:scale-125 transition p-1.5 rounded-lg hover:bg-white">🚜</button>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between gap-2 border-t border-slate-100">
+          <button onclick="resetDefaultLogo()" class="text-red-500 hover:text-red-700 text-xs font-semibold">
+            Reset to Default
+          </button>
+          <button onclick="closeModal('logoModal')" class="bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg text-xs shadow">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="challanModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 animate-slide-up">
+      <div class="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50 sticky top-0">
+        <h3 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+          <span>🧾</span> Official Delivery Challan & Bilty
+        </h3>
+        <button onclick="closeModal('challanModal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <div id="printableChallan" class="p-4 space-y-3 text-xs text-slate-700">
+        <div class="flex items-center justify-between border-b-2 border-emerald-600 pb-2.5">
+          <div class="flex items-center gap-2">
+            <div id="challanLogoContainer" class="w-10 h-10 rounded-full bg-emerald-950 border border-emerald-500 flex items-center justify-center overflow-hidden text-xl shrink-0">
+              🧄
+            </div>
+            <div>
+              <h2 class="font-bold text-xs text-emerald-800" id="challanBizName">Kisan Agri & Seeds Distro</h2>
+              <p class="text-[10px] text-slate-500" id="challanBizAddress">APMC Market Yard</p>
+              <p class="text-[10px] text-slate-500" id="challanBizPhone">Phone: +91 98765 00000</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[9px] block">DELIVERY BILTY</span>
+            <p class="font-mono font-bold text-slate-800 text-[11px]" id="challanNumber">CH-20261123-01</p>
+            <p class="text-slate-400 text-[10px]" id="challanDateTime">23 Nov 10:15 AM</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 grid grid-cols-2 gap-2 text-[11px]">
+          <div>
+            <span class="text-slate-400 block text-[9px] uppercase font-bold">Supplied To:</span>
+            <p class="font-bold text-slate-800 text-xs" id="challanStoreName">Mahadev Supermart</p>
+            <p id="challanStorePhone" class="text-slate-600">+91 98765 43210</p>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[9px] uppercase font-bold">Terms & Status:</span>
+            <p class="font-semibold text-amber-700" id="challanPaymentTerms">Credit / Udhar</p>
+            <p class="font-semibold text-emerald-700" id="challanVerifyStatus">✅ Shop Confirmed</p>
+          </div>
+        </div>
+
+        <table class="w-full border-collapse border border-slate-200 text-left text-[11px]">
+          <thead class="bg-slate-100 text-slate-700">
+            <tr>
+              <th class="p-1.5 border border-slate-200">Item</th>
+              <th class="p-1.5 border border-slate-200 text-center">Pack</th>
+              <th class="p-1.5 border border-slate-200 text-right">Qty</th>
+              <th class="p-1.5 border border-slate-200 text-right">Rate</th>
+              <th class="p-1.5 border border-slate-200 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-1.5 border border-slate-200 font-semibold" id="challanItemName">Ooty Garlic</td>
+              <td class="p-1.5 border border-slate-200 text-center" id="challanPackaging">50kg Bag</td>
+              <td class="p-1.5 border border-slate-200 text-right font-bold" id="challanQty">50 kg</td>
+              <td class="p-1.5 border border-slate-200 text-right" id="challanRate">₹245</td>
+              <td class="p-1.5 border border-slate-200 text-right font-bold text-slate-900" id="challanTotal">₹12,250</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="bg-slate-50 font-bold">
+              <td colspan="4" class="p-1.5 border border-slate-200 text-right">Grand Total:</td>
+              <td class="p-1.5 border border-slate-200 text-right text-emerald-700" id="challanGrandTotal">₹12,250</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 text-center">
+          <div class="p-2 border border-dashed border-slate-300 rounded bg-slate-50/50">
+            <span class="block h-7 italic font-serif text-emerald-800 text-xs">Kisan Agro</span>
+            <p class="text-[9px] font-bold text-slate-500 border-t border-slate-300 pt-0.5">Supplier Stamp</p>
+          </div>
+          <div class="p-2 border border-dashed border-emerald-300 rounded bg-emerald-50/40">
+            <span class="block h-7 font-bold text-emerald-700 text-xs flex items-center justify-center">✅ Accepted</span>
+            <p class="text-[9px] font-bold text-slate-500 border-t border-slate-300 pt-0.5">Store Receiver Stamp</p>
+          </div>
+        </div>
+
+        <p class="text-[9px] text-slate-400 text-center">Digital timestamp logged for supplier and store.</p>
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-200 space-y-2">
+        <button id="sendWhatsAppChallanBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow flex items-center justify-center gap-1.5 transition">
+          <span>📲 Send Receipt to Shopkeeper on WhatsApp</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="flex-1 bg-slate-700 text-white font-semibold py-1.5 rounded-lg text-xs">
+            🖨️ Print Slip
+          </button>
+          <button onclick="closeModal('challanModal')" class="flex-1 bg-slate-200 text-slate-700 font-semibold py-1.5 rounded-lg text-xs">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="broadcastModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 animate-slide-up overflow-hidden">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-emerald-800 text-white">
+        <h3 class="font-bold text-xs flex items-center gap-1.5">
+          <span>📢</span> WhatsApp Daily Rate Card
+        </h3>
+        <button onclick="closeModal('broadcastModal')" class="text-white hover:text-emerald-200 text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <div class="p-4 space-y-3 text-xs">
+        <p class="text-slate-600 text-[11px]">
+          Formatted with today's live price ranges (e.g. ₹240 - ₹260), your logo branding, and ordering instructions:
+        </p>
+
+        <textarea id="broadcastTextArea" rows="9" readonly class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-[11px] font-mono text-slate-800 focus:outline-none"></textarea>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button onclick="copyBroadcastMessage()" class="flex-1 bg-slate-800 hover:bg-slate-900 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow flex items-center justify-center gap-1">
+            <span>📋 Copy</span>
+          </button>
+          <button onclick="openWhatsAppBroadcastDirect()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow flex items-center justify-center gap-1">
+            <span>📲 Open WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="paymentModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 animate-slide-up overflow-hidden">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-slate-800 text-xs">💳 Record Store Payment</h3>
+        <button onclick="closeModal('paymentModal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <form onsubmit="handlePaymentSubmit(event)" class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Select Store *</label>
+          <select id="payStoreSelect" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+            <!-- JS populated -->
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Payment Amount (₹) *</label>
+          <input type="number" id="payAmount" required min="1" placeholder="5000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800 font-bold text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Payment Mode</label>
+          <select id="payMode" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+            <option value="UPI / Online">UPI / PhonePe / GPay</option>
+            <option value="Cash">Cash Collected</option>
+            <option value="Bank Cheque">Bank Cheque</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow transition">
+          Save Payment & Update Khata
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="addStoreModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 animate-slide-up overflow-hidden">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="font-bold text-slate-800 text-xs">🏪 Register New Store</h3>
+        <button onclick="closeModal('addStoreModal')" class="text-slate-400 hover:text-slate-600 text-xl font-bold px-2">&times;</button>
+      </div>
+
+      <form onsubmit="handleAddStoreSubmit(event)" class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Store / Mart Name *</label>
+          <input type="text" id="newStoreName" required placeholder="e.g. Mahadev Supermart" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Owner / Manager Name</label>
+          <input type="text" id="newStoreOwner" placeholder="e.g. Ramesh Bhai" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">WhatsApp / Phone Number *</label>
+          <input type="tel" id="newStorePhone" required placeholder="+91 98..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-600 mb-1">Market Location / Area</label>
+          <input type="text" id="newStoreAddress" placeholder="e.g. Sector 4 Main Bazaar" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2 text-slate-800">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-2 rounded-lg text-xs shadow transition">
+          Register Store
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_PRODUCTS = [
+      {
+        id: 'garlic-ooty',
+        name: 'Ooty Garlic (Special Big Clove)',
+        category: 'Garlic',
+        minRate: 240,
+        maxRate: 260,
+        unit: 'kg',
+        moq: '50 kg (1 Bag)',
+        icon: '🧄',
+        desc: 'Premium large white cloves, strong pungency & long shelf life'
+      },
+      {
+        id: 'garlic-desi-med',
+        name: 'Desi Garlic (Medium Clove / Ladva)',
+        category: 'Garlic',
+        minRate: 170,
+        maxRate: 190,
+        unit: 'kg',
+        moq: '50 kg (1 Bag)',
+        icon: '🧄',
+        desc: 'Fast-moving daily grocery staple, sharp aroma'
+      },
+      {
+        id: 'garlic-desi-sml',
+        name: 'Desi Garlic (Small / Chatni Lot)',
+        category: 'Garlic',
+        minRate: 110,
+        maxRate: 130,
+        unit: 'kg',
+        moq: '50 kg (1 Bag)',
+        icon: '🧄',
+        desc: 'Budget friendly lot for hotels, mess, and chutney processors'
+      },
+      {
+        id: 'seed-kalonji',
+        name: 'Kalonji (Black Cumin / Nigella)',
+        category: 'Seeds',
+        minRate: 240,
+        maxRate: 265,
+        unit: 'kg',
+        moq: '25 kg Sack',
+        icon: '🌱',
+        desc: 'Medicinal grade, jet black machine-cleaned seeds'
+      },
+      {
+        id: 'seed-methi',
+        name: 'Methi Dana (Fenugreek Seeds)',
+        category: 'Seeds',
+        minRate: 80,
+        maxRate: 95,
+        unit: 'kg',
+        moq: '25 kg Sack',
+        icon: '🌱',
+        desc: 'Golden bold grains, ayurvedic & cooking grade'
+      },
+      {
+        id: 'seed-ajwain',
+        name: 'Ajwain (Desi Carom Seeds)',
+        category: 'Seeds',
+        minRate: 190,
+        maxRate: 215,
+        unit: 'kg',
+        moq: '25 kg Sack',
+        icon: '🌱',
+        desc: 'Greenish tinge, high essential thymol oil content'
+      },
+      {
+        id: 'seed-jeera',
+        name: 'Jeera (Cumin Seeds Unjha Machine Clean)',
+        category: 'Seeds',
+        minRate: 275,
+        maxRate: 295,
+        unit: 'kg',
+        moq: '25 kg Sack',
+        icon: '🌱',
+        desc: 'Machine sortex cleaned, no dust or stones'
+      },
+      {
+        id: 'pulse-moong',
+        name: 'Moong Dal (Yellow Mogar)',
+        category: 'Pulses',
+        minRate: 115,
+        maxRate: 125,
+        unit: 'kg',
+        moq: '30 kg Bag',
+        icon: '🥣',
+        desc: 'Unpolished premium grain'
+      },
+      {
+        id: 'pulse-chana',
+        name: 'Chana Dal (Desi Bold)',
+        category: 'Pulses',
+        minRate: 90,
+        maxRate: 100,
+        unit: 'kg',
+        moq: '30 kg Bag',
+        icon: '🥣',
+        desc: 'Uniform grading, fresh mill arrival'
+      }
+    ];
+
+    const DEFAULT_STORES = [
+      { id: 'store-1', name: 'Mahadev Supermart', owner: 'Ramesh Bhai', phone: '+91 98765 43210', address: 'Sector 4 Main Road', balance: 14500, totalSupplied: 45000, totalPaid: 30500 },
+      { id: 'store-2', name: 'Shree Ganesh Kirana Store', owner: 'Ganesh Gupta', phone: '+91 98234 56789', address: 'Bazaar Gate #2', balance: 8200, totalSupplied: 28200, totalPaid: 20000 },
+      { id: 'store-3', name: 'Patel Daily Needs & Veggies', owner: 'Jayesh Patel', phone: '+91 97123 45678', address: 'Colony Road', balance: 22000, totalSupplied: 62000, totalPaid: 40000 },
+      { id: 'store-4', name: 'Krishna Ayurvedic & Grocery', owner: 'Dr. Sharad Sharma', phone: '+91 99887 76655', address: 'Gandhi Chowk', balance: 0, totalSupplied: 19500, totalPaid: 19500 }
+    ];
+
+    const DEFAULT_DELIVERIES = [
+      {
+        id: 'CH-20261123-01',
+        timestamp: '23-Nov-2026 08:30 AM',
+        storeId: 'store-1',
+        storeName: 'Mahadev Supermart',
+        storePhone: '+91 98765 43210',
+        productId: 'garlic-ooty',
+        productName: 'Ooty Garlic (Special Big Clove)',
+        quantity: 50,
+        unit: 'kg',
+        packaging: 'Gunny Bag (50kg)',
+        rate: 250,
+        totalAmount: 12500,
+        paymentStatus: 'Credit / Udhar (Weekly Khata)',
+        verifiedByStore: true,
+        driver: 'Direct Supply'
+      },
+      {
+        id: 'CH-20261122-02',
+        timestamp: '22-Nov-2026 04:15 PM',
+        storeId: 'store-2',
+        storeName: 'Shree Ganesh Kirana Store',
+        storePhone: '+91 98234 56789',
+        productId: 'seed-kalonji',
+        productName: 'Kalonji (Black Cumin / Nigella)',
+        quantity: 25,
+        unit: 'kg',
+        packaging: 'Mesh Bag (25kg)',
+        rate: 250,
+        totalAmount: 6250,
+        paymentStatus: 'Credit / Udhar (Weekly Khata)',
+        verifiedByStore: true,
+        driver: 'Raju (Delivery Boy)'
+      }
+    ];
+
+    let products = JSON.parse(localStorage.getItem('distro_products_v2')) || DEFAULT_PRODUCTS;
+    let stores = JSON.parse(localStorage.getItem('distro_stores_v2')) || DEFAULT_STORES;
+    let deliveries = JSON.parse(localStorage.getItem('distro_deliveries_v2')) || DEFAULT_DELIVERIES;
+    let customLogo = localStorage.getItem('distro_custom_logo') || null;
+    let businessProfile = JSON.parse(localStorage.getItem('distro_biz_v2')) || {
+      name: 'Kisan Agri & Seeds Distro',
+      phone: '+91 98765 00000',
+      address: 'Shop #42, APMC Grain & Garlic Market Yard',
+      upi: 'kisanagro@upi'
+    };
+
+    let activeFilter = 'all';
+
+    const formatINR = (val) => '₹' + Number(val).toLocaleString('en-IN');
+    const getTodayFormatted = () => {
+      const now = new Date();
+      return now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const todayStr = getTodayFormatted();
+      document.getElementById('headerTodayDate').textContent = todayStr;
+      document.getElementById('storefrontDate').textContent = todayStr;
+
+      applyLogoEverywhere();
+      updateBusinessDisplay();
+      populateDropdowns();
+      renderRates();
+      renderDeliveries();
+      renderKhata();
+      renderStorefront();
+      renderStoresSettings();
+    });
+
+    function applyLogoEverywhere() {
+      const containers = [
+        'headerLogoContainer',
+        'settingsLogoPreview',
+        'modalLogoPreview',
+        'storefrontLogoContainer',
+        'challanLogoContainer'
+      ];
+
+      containers.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if (customLogo) {
+          if (customLogo.startsWith('data:image')) {
+            el.innerHTML = `<img src="${customLogo}" class="w-full h-full object-cover">`;
+          } else {
+            el.innerHTML = customLogo;
+          }
+        } else {
+          el.innerHTML = '🧄';
+        }
+      });
+    }
+
+    function openLogoUploadModal() {
+      document.getElementById('logoModal').classList.remove('hidden');
+      document.getElementById('logoModal').classList.add('flex');
+    }
+
+    function handleLogoFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        customLogo = evt.target.result;
+        localStorage.setItem('distro_custom_logo', customLogo);
+        applyLogoEverywhere();
+        showToast("New custom logo applied!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setLogoEmoji(emoji) {
+      customLogo = emoji;
+      localStorage.setItem('distro_custom_logo', customLogo);
+      applyLogoEverywhere();
+      showToast(`Logo icon set to ${emoji}!`);
+    }
+
+    function resetDefaultLogo() {
+      customLogo = null;
+      localStorage.removeItem('distro_custom_logo');
+      applyLogoEverywhere();
+      showToast("Reset to default garlic logo");
+    }
+
+    function switchTab(tabId) {
+      const tabs = ['rates', 'delivery', 'khata', 'client-view', 'settings'];
+      tabs.forEach(t => {
+        const view = document.getElementById('view-' + t);
+        const nav = document.getElementById('nav-' + t);
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          nav.className = "py-2.5 flex flex-col items-center justify-center text-emerald-700 font-bold border-t-2 border-emerald-600 bg-emerald-50/50";
+        } else {
+          view.classList.add('hidden');
+          nav.className = "py-2.5 flex flex-col items-center justify-center text-slate-500 hover:text-slate-800 font-medium border-t-2 border-transparent";
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 3000);
+    }
+
+    function filterRates(cat) {
+      activeFilter = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        if (btn.dataset.cat === cat) {
+          btn.className = "cat-pill px-3 py-1 rounded-full bg-slate-800 text-white font-medium shrink-0";
+        } else {
+          btn.className = "cat-pill px-3 py-1 rounded-full bg-white border border-slate-300 text-slate-700 font-medium shrink-0";
+        }
+      });
+      renderRates();
+    }
+
+    function renderRates() {
+      const container = document.getElementById('productsListContainer');
+      document.getElementById('cat-count-all').textContent = products.length;
+
+      const filtered = activeFilter === 'all' ? products : products.filter(p => p.category === activeFilter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-6 rounded-xl border border-slate-200 text-center space-y-2">
+            <span class="text-3xl">📦</span>
+            <p class="text-xs text-slate-500">No products found in this category.</p>
+            <button onclick="openAddProductModal()" class="text-xs text-emerald-700 font-bold underline">Add one now</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => `
+        <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm hover:border-emerald-300 transition space-y-2.5">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${p.icon || '🌱'}</span>
+              <div>
+                <h4 class="font-bold text-slate-800 text-xs leading-tight">${p.name}</h4>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-medium">${p.category}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">MOQ: ${p.moq || '1 Bag'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="openEditProductModal('${p.id}')" class="text-slate-400 hover:text-emerald-700 p-1" title="Edit Product">✏️</button>
+              <button onclick="deleteProduct('${p.id}')" class="text-slate-400 hover:text-red-600 p-1" title="Delete Product">🗑️</button>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between gap-2">
+            <div>
+              <span class="text-[9px] font-bold text-slate-400 uppercase block">Today's Range (₹/${p.unit})</span>
+              <div class="flex items-center gap-1 text-xs">
+                <span class="font-bold text-slate-700">₹</span>
+                <input type="number" id="min-rate-${p.id}" value="${p.minRate}" min="1" step="1" class="w-14 bg-white border border-slate-300 rounded px-1.5 py-0.5 font-bold text-emerald-700 text-xs text-center focus:ring-1 focus:ring-emerald-500">
+                <span class="text-slate-400 font-bold">-</span>
+                <input type="number" id="max-rate-${p.id}" value="${p.maxRate}" min="1" step="1" class="w-14 bg-white border border-slate-300 rounded px-1.5 py-0.5 font-bold text-emerald-700 text-xs text-center focus:ring-1 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <div class="text-right">
+              <span class="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-1 rounded border border-amber-200 block">
+                ₹${p.minRate} - ₹${p.maxRate}
+              </span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function saveAllRates() {
+      products.forEach(p => {
+        const minInp = document.getElementById(`min-rate-${p.id}`);
+        const maxInp = document.getElementById(`max-rate-${p.id}`);
+        if (minInp && maxInp) {
+          const minVal = parseFloat(minInp.value) || p.minRate;
+          const maxVal = parseFloat(maxInp.value) || minVal;
+          p.minRate = Math.min(minVal, maxVal);
+          p.maxRate = Math.max(minVal, maxVal);
+        }
+      });
+
+      localStorage.setItem('distro_products_v2', JSON.stringify(products));
+      renderRates();
+      renderStorefront();
+      populateDropdowns();
+      showToast("All daily price ranges saved!");
+    }
+
+    function openAddProductModal() {
+      document.getElementById('productModalTitle').textContent = "Add New Product";
+      document.getElementById('prodFormId').value = '';
+      document.getElementById('prodFormName').value = '';
+      document.getElementById('prodFormCategory').value = 'Garlic';
+      document.getElementById('prodFormIcon').value = '🧄';
+      document.getElementById('prodFormMinRate').value = '240';
+      document.getElementById('prodFormMaxRate').value = '260';
+      document.getElementById('prodFormUnit').value = 'kg';
+      document.getElementById('prodFormMoq').value = '50 kg (1 Bag)';
+      document.getElementById('prodFormDesc').value = '';
+
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
+
+    function openEditProductModal(prodId) {
+      const p = products.find(item => item.id === prodId);
+      if (!p) return;
+
+      document.getElementById('productModalTitle').textContent = "Edit " + p.name;
+      document.getElementById('prodFormId').value = p.id;
+      document.getElementById('prodFormName').value = p.name;
+      document.getElementById('prodFormCategory').value = p.category;
+      document.getElementById('prodFormIcon').value = p.icon || '🌱';
+      document.getElementById('prodFormMinRate').value = p.minRate;
+      document.getElementById('prodFormMaxRate').value = p.maxRate;
+      document.getElementById('prodFormUnit').value = p.unit;
+      document.getElementById('prodFormMoq').value = p.moq;
+      document.getElementById('prodFormDesc').value = p.desc || '';
+
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
+
+    function handleProductFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('prodFormId').value;
+      const name = document.getElementById('prodFormName').value;
+      const category = document.getElementById('prodFormCategory').value;
+      const icon = document.getElementById('prodFormIcon').value;
+      let minRate = parseFloat(document.getElementById('prodFormMinRate').value) || 0;
+      let maxRate = parseFloat(document.getElementById('prodFormMaxRate').value) || minRate;
+      const unit = document.getElementById('prodFormUnit').value;
+      const moq = document.getElementById('prodFormMoq').value;
+      const desc = document.getElementById('prodFormDesc').value;
+
+      if (minRate > maxRate) {
+        const tmp = minRate;
+        minRate = maxRate;
+        maxRate = tmp;
+      }
+
+      if (id) {
+        const idx = products.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          products[idx] = { ...products[idx], name, category, icon, minRate, maxRate, unit, moq, desc };
+          showToast(`Updated ${name}!`);
+        }
+      } else {
+        const newId = 'prod-' + Date.now();
+        products.push({ id: newId, name, category, icon, minRate, maxRate, unit, moq, desc });
+        showToast(`Added ${name} to rate board!`);
+      }
+
+      localStorage.setItem('distro_products_v2', JSON.stringify(products));
+      closeModal('productModal');
+      renderRates();
+      renderStorefront();
+      populateDropdowns();
+    }
+
+    function deleteProduct(prodId) {
+      const p = products.find(item => item.id === prodId);
+      if (confirm(`Remove "${p?.name}" from your catalog?`)) {
+        products = products.filter(item => item.id !== prodId);
+        localStorage.setItem('distro_products_v2', JSON.stringify(products));
+        renderRates();
+        renderStorefront();
+        populateDropdowns();
+        showToast("Product deleted.");
+      }
+    }
+
+    function openBroadcastModal() {
+      saveAllRates();
+      const dateStr = getTodayFormatted();
+      let msg = `🧄 *${businessProfile.name.toUpperCase()}* 🧄\n`;
+      msg += `📢 *TODAY'S MANDI RATES (${dateStr})*\n`;
+      msg += `📍 *Wholesale Supply to Grocery Stores & Marts*\n`;
+      msg += `------------------------------------\n\n`;
+
+      products.forEach((p, idx) => {
+        msg += `${idx + 1}. *${p.name}*\n`;
+        if (p.minRate === p.maxRate) {
+          msg += `   👉 *Rate: ₹${p.minRate} / ${p.unit}* (MOQ: ${p.moq})\n`;
+        } else {
+          msg += `   👉 *Rate: ₹${p.minRate} - ₹${p.maxRate} / ${p.unit}* (MOQ: ${p.moq})\n`;
+        }
+      });
+
+      msg += `\n------------------------------------\n`;
+      msg += `🚚 *Delivery:* Same day / Next morning delivery at your shop\n`;
+      msg += `💳 *Billing:* Digital Challan with exact time & weekly khata\n`;
+      msg += `📲 *To order or query, reply here or call:* ${businessProfile.phone}\n`;
+
+      document.getElementById('broadcastTextArea').value = msg;
+      document.getElementById('broadcastModal').classList.remove('hidden');
+      document.getElementById('broadcastModal').classList.add('flex');
+    }
+
+    function copyBroadcastMessage() {
+      const text = document.getElementById('broadcastTextArea').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("WhatsApp Rate Card copied to clipboard!");
+      });
+    }
+
+    function openWhatsAppBroadcastDirect() {
+      const text = encodeURIComponent(document.getElementById('broadcastTextArea').value);
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    }
+
+    function populateDropdowns() {
+      const storeSelect = document.getElementById('delStoreSelect');
+      const prodSelect = document.getElementById('delProductSelect');
+      const payStoreSelect = document.getElementById('payStoreSelect');
+      const clientProdSelect = document.getElementById('clientProductSelect');
+
+      storeSelect.innerHTML = stores.map(s => `<option value="${s.id}">${s.name} (${s.owner})</option>`).join('');
+      payStoreSelect.innerHTML = stores.map(s => `<option value="${s.id}">${s.name} - Outstanding: ₹${s.balance}</option>`).join('');
+
+      prodSelect.innerHTML = products.map(p => `
+        <option value="${p.id}">${p.name} (₹${p.minRate}-${p.maxRate}/${p.unit})</option>
+      `).join('');
+
+      clientProdSelect.innerHTML = products.map(p => `
+        <option value="${p.id}">${p.name} (₹${p.minRate}-${p.maxRate}/${p.unit})</option>
+      `).join('');
+
+      handleProductSelectForDelivery();
+    }
+
+    function handleProductSelectForDelivery() {
+      const prodId = document.getElementById('delProductSelect').value;
+      const prod = products.find(p => p.id === prodId);
+      if (!prod) return;
+
+      document.getElementById('helperRangeText').textContent = `₹${prod.minRate} - ₹${prod.maxRate} / ${prod.unit}`;
+      
+      const mid = Math.round((prod.minRate + prod.maxRate) / 2);
+      const quickBtns = document.getElementById('helperQuickButtons');
+      quickBtns.innerHTML = `
+        <button type="button" onclick="setDeliveryRate(${prod.minRate})" class="bg-white px-1.5 py-0.5 rounded border border-amber-300 font-bold text-[10px] text-amber-900">Min: ₹${prod.minRate}</button>
+        <button type="button" onclick="setDeliveryRate(${mid})" class="bg-white px-1.5 py-0.5 rounded border border-amber-300 font-bold text-[10px] text-amber-900">Mid: ₹${mid}</button>
+        <button type="button" onclick="setDeliveryRate(${prod.maxRate})" class="bg-white px-1.5 py-0.5 rounded border border-amber-300 font-bold text-[10px] text-amber-900">Max: ₹${prod.maxRate}</button>
+      `;
+
+      document.getElementById('delRate').value = mid;
+      calculateDeliveryTotal();
+    }
+
+    function setDeliveryRate(r) {
+      document.getElementById('delRate').value = r;
+      calculateDeliveryTotal();
+    }
+
+    function calculateDeliveryTotal() {
+      const qty = parseFloat(document.getElementById('delQuantity').value) || 0;
+      const rate = parseFloat(document.getElementById('delRate').value) || 0;
+      document.getElementById('delTotal').value = formatINR(qty * rate);
+    }
+
+    function handleDeliverySubmit(e) {
+      e.preventDefault();
+      const storeId = document.getElementById('delStoreSelect').value;
+      const store = stores.find(s => s.id === storeId);
+      const prodId = document.getElementById('delProductSelect').value;
+      const prod = products.find(p => p.id === prodId);
+      const qty = parseFloat(document.getElementById('delQuantity').value);
+      const packaging = document.getElementById('delPackaging').value;
+      const rate = parseFloat(document.getElementById('delRate').value);
+      const paymentStatus = document.getElementById('delPaymentStatus').value;
+      const total = qty * rate;
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      const challanId = `CH-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(deliveries.length + 1).padStart(2,'0')}`;
+
+      const newDel = {
+        id: challanId,
+        timestamp: `${getTodayFormatted()} ${timeStr}`,
+        storeId: store.id,
+        storeName: store.name,
+        storePhone: store.phone,
+        productId: prod.id,
+        productName: prod.name,
+        quantity: qty,
+        unit: prod.unit,
+        packaging: packaging,
+        rate: rate,
+        totalAmount: total,
+        paymentStatus: paymentStatus,
+        verifiedByStore: true,
+        driver: 'Direct Supply'
+      };
+
+      deliveries.unshift(newDel);
+      localStorage.setItem('distro_deliveries_v2', JSON.stringify(deliveries));
+
+      if (paymentStatus.includes('Credit')) {
+        store.balance += total;
+        store.totalSupplied += total;
+      } else {
+        store.totalSupplied += total;
+        store.totalPaid += total;
+      }
+      localStorage.setItem('distro_stores_v2', JSON.stringify(stores));
+
+      renderDeliveries();
+      renderKhata();
+      showToast(`Supplied to ${store.name}! Challan generated.`);
+      openChallanModal(challanId);
+    }
+
+    function renderDeliveries() {
+      const container = document.getElementById('deliveriesMobileList');
+      document.getElementById('deliveryCountBadge').textContent = `${deliveries.length} deliveries`;
+
+      if (deliveries.length === 0) {
+        container.innerHTML = `<div class="bg-white p-4 rounded-xl text-center text-xs text-slate-400">No delivery logs yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = deliveries.map(d => `
+        <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-bold text-xs text-slate-800">${d.storeName}</span>
+              <p class="text-[10px] text-slate-400">${d.timestamp} • <span class="font-mono text-slate-600">${d.id}</span></p>
+            </div>
+            <span class="text-xs font-bold text-slate-900">${formatINR(d.totalAmount)}</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-100">
+            <span class="text-slate-600 font-medium">${d.productName} (${d.quantity} ${d.unit} @ ₹${d.rate})</span>
+            <button onclick="openChallanModal('${d.id}')" class="text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded font-bold border border-emerald-200 text-[10px]">
+              Challan / WhatsApp
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openChallanModal(delId) {
+      const d = deliveries.find(item => item.id === delId);
+      if (!d) return;
+
+      const store = stores.find(s => s.id === d.storeId) || { owner: 'Manager', address: 'Market' };
+
+      document.getElementById('challanBizName').textContent = businessProfile.name;
+      document.getElementById('challanBizAddress').textContent = businessProfile.address;
+      document.getElementById('challanBizPhone').textContent = "Phone: " + businessProfile.phone;
+
+      document.getElementById('challanNumber').textContent = d.id;
+      document.getElementById('challanDateTime').textContent = d.timestamp;
+      document.getElementById('challanStoreName').textContent = d.storeName;
+      document.getElementById('challanStorePhone').textContent = d.storePhone;
+      document.getElementById('challanPaymentTerms').textContent = d.paymentStatus;
+
+      document.getElementById('challanItemName').textContent = d.productName;
+      document.getElementById('challanPackaging').textContent = d.packaging;
+      document.getElementById('challanQty').textContent = `${d.quantity} ${d.unit}`;
+      document.getElementById('challanRate').textContent = `₹${d.rate}`;
+      document.getElementById('challanTotal').textContent = formatINR(d.totalAmount);
+      document.getElementById('challanGrandTotal').textContent = formatINR(d.totalAmount);
+
+      applyLogoEverywhere();
+
+      const waBtn = document.getElementById('sendWhatsAppChallanBtn');
+      waBtn.onclick = () => {
+        let text = `*DELIVERY RECEIPT - ${businessProfile.name.toUpperCase()}*\n`;
+        text += `🧾 *Challan No:* ${d.id}\n`;
+        text += `🏪 *Store:* ${d.storeName}\n`;
+        text += `🕒 *Delivered On:* ${d.timestamp}\n`;
+        text += `------------------------------------\n`;
+        text += `📦 *Item:* ${d.productName}\n`;
+        text += `⚖️ *Quantity:* ${d.quantity} ${d.unit} (${d.packaging})\n`;
+        text += `🏷️ *Rate:* ₹${d.rate}/${d.unit}\n`;
+        text += `💰 *Total Bill:* ₹${d.totalAmount}\n`;
+        text += `💳 *Terms:* ${d.paymentStatus}\n`;
+        text += `------------------------------------\n`;
+        text += `✅ *Double Entry Logged & Confirmed.*\n`;
+        text += `Thank you for your business!`;
+
+        const encoded = encodeURIComponent(text);
+        window.open(`https://api.whatsapp.com/send?phone=${d.storePhone.replace(/[^0-9]/g,'')}&text=${encoded}`, '_blank');
+      };
+
+      document.getElementById('challanModal').classList.remove('hidden');
+      document.getElementById('challanModal').classList.add('flex');
+    }
+
+    function renderKhata() {
+      let totalSupplied = 0;
+      let totalOutstanding = 0;
+
+      stores.forEach(s => {
+        totalSupplied += (s.totalSupplied || 0);
+        totalOutstanding += (s.balance || 0);
+      });
+
+      document.getElementById('khataTotalSupplied').textContent = formatINR(totalSupplied);
+      document.getElementById('khataTotalOutstanding').textContent = formatINR(totalOutstanding);
+
+      const container = document.getElementById('khataMobileList');
+      container.innerHTML = stores.map(s => `
+        <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm space-y-2">
+          <div class="flex items-start justify-between">
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">${s.name}</h4>
+              <p class="text-[10px] text-slate-400">${s.owner} • ${s.phone}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-extrabold ${s.balance > 0 ? 'text-amber-700' : 'text-slate-400'}">
+                ${formatINR(s.balance)} Bal
+              </span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px]">
+            <span class="text-slate-500">Supplied: ${formatINR(s.totalSupplied)} | Paid: ${formatINR(s.totalPaid)}</span>
+            ${s.balance > 0 ? `
+              <button onclick="sendKhataReminder('${s.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                💬 Remind
+              </button>
+            ` : `<span class="text-emerald-600 font-bold">Clear ✅</span>`}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendKhataReminder(storeId) {
+      const s = stores.find(item => item.id === storeId);
+      if (!s) return;
+
+      let msg = `*PAYMENT REMINDER - ${businessProfile.name.toUpperCase()}*\n`;
+      msg += `Namaste ${s.owner} ji (${s.name}),\n\n`;
+      msg += `Current supply ledger summary:\n`;
+      msg += `📦 Goods Supplied: *${formatINR(s.totalSupplied)}*\n`;
+      msg += `✅ Payments Received: *${formatINR(s.totalPaid)}*\n`;
+      msg += `⏳ *Outstanding Balance Due: ${formatINR(s.balance)}*\n\n`;
+      msg += `Kindly clear the balance payment at your convenience.\n`;
+      msg += `UPI ID: *${businessProfile.upi}*\n\n`;
+      msg += `Thank you!`;
+
+      const encoded = encodeURIComponent(msg);
+      window.open(`https://api.whatsapp.com/send?phone=${s.phone.replace(/[^0-9]/g,'')}&text=${encoded}`, '_blank');
+    }
+
+    function openAddPaymentModal() {
+      populateDropdowns();
+      document.getElementById('paymentModal').classList.remove('hidden');
+      document.getElementById('paymentModal').classList.add('flex');
+    }
+
+    function handlePaymentSubmit(e) {
+      e.preventDefault();
+      const storeId = document.getElementById('payStoreSelect').value;
+      const amount = parseFloat(document.getElementById('payAmount').value) || 0;
+      const store = stores.find(s => s.id === storeId);
+
+      if (store) {
+        store.totalPaid = (store.totalPaid || 0) + amount;
+        store.balance = Math.max(0, (store.balance || 0) - amount);
+        localStorage.setItem('distro_stores_v2', JSON.stringify(stores));
+        closeModal('paymentModal');
+        renderKhata();
+        showToast(`Recorded ₹${amount} payment for ${store.name}!`);
+      }
+    }
+
+    function renderStorefront() {
+      const container = document.getElementById('storefrontRatesList');
+      container.innerHTML = products.map(p => `
+        <div class="flex items-center justify-between p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">${p.icon || '🌱'}</span>
+            <div>
+              <p class="font-bold text-slate-800 text-xs">${p.name}</p>
+              <p class="text-[9px] text-slate-400">MOQ: ${p.moq || '1 Bag'}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-emerald-700 font-extrabold text-xs">
+              ${p.minRate === p.maxRate ? '₹' + p.minRate : '₹' + p.minRate + ' - ₹' + p.maxRate}
+            </span>
+            <span class="text-[9px] text-slate-400 block">/${p.unit}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleClientOrderSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('clientShopName').value;
+      const phone = document.getElementById('clientPhone').value;
+      const prodId = document.getElementById('clientProductSelect').value;
+      const prod = products.find(p => p.id === prodId);
+      const address = document.getElementById('clientAddress').value || 'Market';
+
+      let store = stores.find(s => s.phone === phone || s.name.toLowerCase() === name.toLowerCase());
+      if (!store) {
+        store = {
+          id: 'store-' + (stores.length + 1),
+          name: name,
+          owner: 'Manager',
+          phone: phone,
+          address: address,
+          balance: 0,
+          totalSupplied: 0,
+          totalPaid: 0
+        };
+        stores.push(store);
+        localStorage.setItem('distro_stores_v2', JSON.stringify(stores));
+        populateDropdowns();
+      }
+
+      showToast(`🎉 Order request from ${name} received!`);
+      e.target.reset();
+      switchTab('delivery');
+      document.getElementById('delStoreSelect').value = store.id;
+      document.getElementById('delProductSelect').value = prodId;
+      handleProductSelectForDelivery();
+    }
+
+    function copyShareableLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast("Public catalog link copied to clipboard!");
+      });
+    }
+
+    function updateBusinessDisplay() {
+      document.getElementById('bizTitleDisplay').textContent = businessProfile.name;
+      document.getElementById('settingsBizTitleDisplay').textContent = businessProfile.name;
+      document.getElementById('storefrontBizName').textContent = businessProfile.name;
+      document.getElementById('settingsBizName').value = businessProfile.name;
+      document.getElementById('settingsBizPhone').value = businessProfile.phone;
+      document.getElementById('settingsBizAddress').value = businessProfile.address;
+      document.getElementById('settingsBizUpi').value = businessProfile.upi;
+    }
+
+    function handleSaveBusinessProfile(e) {
+      e.preventDefault();
+      businessProfile.name = document.getElementById('settingsBizName').value;
+      businessProfile.phone = document.getElementById('settingsBizPhone').value;
+      businessProfile.address = document.getElementById('settingsBizAddress').value;
+      businessProfile.upi = document.getElementById('settingsBizUpi').value;
+
+      localStorage.setItem('distro_biz_v2', JSON.stringify(businessProfile));
+      updateBusinessDisplay();
+      showToast("Business profile updated!");
+    }
+
+    function renderStoresSettings() {
+      const container = document.getElementById('storesSettingsList');
+      container.innerHTML = stores.map(s => `
+        <div class="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs">
+          <div>
+            <h4 class="font-bold text-slate-800 text-xs">${s.name}</h4>
+            <p class="text-[10px] text-slate-500">${s.owner} • ${s.phone}</p>
+          </div>
+          <button onclick="deleteStore('${s.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function openAddStoreModal() {
+      document.getElementById('addStoreModal').classList.remove('hidden');
+      document.getElementById('addStoreModal').classList.add('flex');
+    }
+
+    function handleAddStoreSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newStoreName').value;
+      const owner = document.getElementById('newStoreOwner').value || 'Owner';
+      const phone = document.getElementById('newStorePhone').value;
+      const address = document.getElementById('newStoreAddress').value || 'Market';
+
+      stores.push({
+        id: 'store-' + (stores.length + 1),
+        name, owner, phone, address,
+        balance: 0, totalSupplied: 0, totalPaid: 0
+      });
+
+      localStorage.setItem('distro_stores_v2', JSON.stringify(stores));
+      closeModal('addStoreModal');
+      e.target.reset();
+      renderStoresSettings();
+      renderKhata();
+      populateDropdowns();
+      showToast(`Store "${name}" registered!`);
+    }
+
+    function deleteStore(storeId) {
+      if (confirm("Remove this store from your directory?")) {
+        stores = stores.filter(s => s.id !== storeId);
+        localStorage.setItem('distro_stores_v2', JSON.stringify(stores));
+        renderStoresSettings();
+        renderKhata();
+        populateDropdowns();
+        showToast("Store removed.");
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+      document.getElementById(id).classList.remove('flex');
+    }
+  </script>
+</body>
+</html>
